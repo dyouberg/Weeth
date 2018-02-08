@@ -7,6 +7,10 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = { url: 'http://localhost:8080' };
+
+    this.createItem = this.createItem.bind(this);
+    this.searchItem = this.searchItem.bind(this);
+    this.editItem = this.editItem.bind(this);
   }
 
   componentDidMount() {
