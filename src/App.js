@@ -31,11 +31,6 @@ class App extends Component {
         data: response,
       });
     });
-
-
-    this.setState({
-      url: 'http://localhost:8080',
-    });
   }
 
   createItem() {
