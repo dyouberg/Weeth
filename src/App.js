@@ -1,131 +1,109 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+import Grid from 'material-ui/Grid';
+import Typography from 'material-ui/Typography';
+import TextField from 'material-ui/TextField';
+import Button from 'material-ui/Button';
+import { CircularProgress } from 'material-ui/Progress';
+import { withStyles } from 'material-ui/styles';
+import logo from './ethereum.png';
+import DataList from './DataList';
 import './App.css';
 
 class App extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { url: 'http://localhost:8080' };
+    this.state = {
+      url: 'http://localhost:8080/api',
+      content: '',
+      itemId: '',
+      loading: false
+    };
 
     this.createItem = this.createItem.bind(this);
-    this.searchItem = this.searchItem.bind(this);
-    this.editItem = this.editItem.bind(this);
   }
 
   componentDidMount() {
-    // load all data
+
+  }
+
+  createItem(e) {
+    e.preventDefault();
     const { url } = this.state;
+
+    this.setState({ loading: true });
 
     fetch(`${url}/data`, {
-      method: 'GET',
-      headers: new Headers({
-        'Content-Type': 'application/json'
-      })
-    }).then(res => res.json())
-    .catch(error => console.error('Error:', error))
-    .then(response => {
-      console.log('Success:', response)
-      this.setState({
-        ...this.state,
-        data: response,
-      });
-    });
-  }
-
-  createItem() {
-    console.log('create item');
-    const { url } = this.state;
-
-    const sampleData = {
-      content: 'Here is some content',
-      contractAddress: '0xABCDEF0123456',
-      contractUrl: 'www.google.com',
-      id: '1234567890',
-      itemId: '123456'
-    };
-    
-    fetch(url, {
       method: 'POST',
-      body: sampleData, 
+      body: JSON.stringify({ content: this.state.content, itemId: this.state.itemId }),
       headers: new Headers({
         'Content-Type': 'application/json'
       })
     }).then(res => res.json())
-    .catch(error => console.error('Error:', error))
-    .then(response => console.log('Success:', response));
+      .then((resJson) => this.setState({ loading: false }))
+      .catch((error) => this.setState({ loading: false }))
   }
 
-  searchItem(id) {
-    console.log('search item');
-    console.log(id);
-
-    const { url } = this.state;
-    
-    fetch(`${url}/123456`, {
-      method: 'GET',
-      headers: new Headers({
-        'Content-Type': 'application/json'
-      })
-    }).then(res => res.json())
-    .catch(error => console.error('Error:', error))
-    .then(response => console.log('Success:', response));
-  }
-
-  editItem(id) {
-    console.log('edit item');
-    console.log(id);
-
-    const { url } = this.state;
-
-    const sampleUpdate = {
-      content: 'Here is some updated content',
-    };
-    
-    fetch(`${url}/123456`, {
-      method: 'PUT',
-      body: sampleUpdate,
-      headers: new Headers({
-        'Content-Type': 'application/json'
-      })
-    }).then(res => res.json())
-    .catch(error => console.error('Error:', error))
-    .then(response => console.log('Success:', response));
-  }
+  handleChange = name => event => {
+    this.setState({
+      [name]: event.target.value,
+    });
+  };
 
   render() {
-    const { data } = this.state;
+    const { loading, success } = this.state;
+    const { classes } = this.props;
+
+    const style = {
+      height: '500px',
+      marginBottom: '220px'
+    };
+
+    const list = {
+      textAlign: 'center'
+    }
 
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-        <hr />
-        <h5>Data: </h5>
-        {data && data.map((item, index) => (
-          <div className="item">
-            <h5>Item Number {index}</h5>
-            <p>Content: {item.content}</p>
-            <p>Contract Address: {item.contractAddress}</p>
-            <p>Contract URL: {item.contractUrl}</p>
-            <p>Id: {item.Id}</p>
-            <p>Item Id: {item.itemId}</p>
-
-            <button onClick={() => this.searchItem(item.itemId)}>Search Item</button>
-            <button onClick={() => this.editItem(item.itemId)}>Edit Item</button>
-          </div>
-        ))}
-        <hr />
-        <button onClick={this.createItem}>Create Item</button>
-        <hr />
+        <Grid container>
+          <Grid item xs={12} style={style}>
+            <img src={logo} alt="" />
+            <Typography variant="display3" style={{ marginTop: '20px' }} gutterBottom>
+              Ethereum Seed to Sale API
+            </Typography>
+            <form autoComplete="off" onSubmit={this.createItem}>
+              <TextField
+                id="itemId"
+                required
+                placeholder="Item id (CMS id)"
+                margin="normal"
+                value={this.state.itemId}
+                onChange={this.handleChange('itemId')}
+              /><br /><br />
+              <TextField
+                id="content"
+                required
+                multiline
+                rowsMax="4"
+                placeholder="Item state"
+                value={this.state.content}
+                onChange={this.handleChange('content')}
+              /><br /><br />
+              <Button variant="raised" type="submit" size="large" disabled={loading}>
+                Create an item
+              </Button>
+              {loading && <CircularProgress size={24} />}
+            </form>
+          </Grid>
+          <Grid item xs={12} style={list}>
+            <DataList></DataList>
+          </Grid>
+        </Grid>
       </div>
     );
   }
 }
 
-export default App;
+export default withStyles(() => ({
+  
+}))(App);
